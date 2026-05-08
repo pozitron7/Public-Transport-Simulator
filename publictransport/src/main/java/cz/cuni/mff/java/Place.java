@@ -2,10 +2,10 @@ package cz.cuni.mff.java;
 
 public abstract class Place {
     private String name;
-    private String id;
+    private int id;
     private Coordinates coordinates;
 
-    public Place(String name, String id, Coordinates coordinates) {
+    public Place(String name, int id, Coordinates coordinates) {
         this.name = name;
         this.id = id;
         this.coordinates = coordinates;
@@ -15,11 +15,14 @@ public abstract class Place {
         return name;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
     public Coordinates getCoordinates() {
         return coordinates;
+    }
+    public boolean equals(Place other) {
+        return this.id == other.id;
     }
 }

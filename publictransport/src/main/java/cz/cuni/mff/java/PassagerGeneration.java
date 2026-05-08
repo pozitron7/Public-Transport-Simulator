@@ -2,9 +2,9 @@ package cz.cuni.mff.java;
 
 public class PassagerGeneration {
     Stop[] stops;
-    int [] averagePassengersAtStopPerminute;
+    double [] averagePassengersAtStopPerminute;
     // expects order of stops to be the same as order of average passengers at stop per minute
-    public PassagerGeneration(Stop[] stops, int[] averagePassengersAtStopPerminute) {
+    public PassagerGeneration(Stop[] stops, double[] averagePassengersAtStopPerminute) {
         this.stops = stops;
         this.averagePassengersAtStopPerminute = averagePassengersAtStopPerminute;
 
@@ -17,14 +17,35 @@ public class PassagerGeneration {
         }
         throw new IllegalArgumentException("Stop not found in the list of stops.");
     }
-    public int getAveragePassengersAtStopPerMinute(Stop stop) {
+    public double getAveragePassengersAtStopPerMinute(Stop stop) {
         int index = getIndexOfStop(stop);
         return averagePassengersAtStopPerminute[index];
+    }
+    public int getNumberOfPassagersThatAppearAtStopPoason(int timeIntervalSeconds, Stop stop){
+        double averagePerMinute = getAveragePassengersAtStopPerMinute(stop);
+        double lambda = averagePerMinute * (timeIntervalSeconds / 60.0);
+
+        if (lambda <= 0.0) return 0;
+        if (lambda > 500.0) {
+            // For large lambda, the Poisson distributionis almopst same as a normal distribution
+            double mean = lambda;
+            double stddev = Math.sqrt(lambda);
+            return (int) Math.round(mean + stddev * new java.util.Random().nextGaussian());
+        }
+        // Knuth's Algorithm generates poisson distribution but works only for small lambda here it is ok
+        double L = Math.exp(-lambda);
+        int k = 0;
+        double p = 1.0;
+        do {
+            k++;
+            p *= Math.random();
+        } while (p > L);
+        return k - 1;
     }
     // randomlygenerates passagers with final destination based on average number of pasagers generated there, it mimics stops popularity
     public Place [] generatePassagesWithFinalDestination(Place start, Place [] validDestinations, int numberOfPassagersToGenerate) {
         if ( numberOfPassagersToGenerate > 0) {
-            int [] likelihoods = new int[validDestinations.length];
+            double [] likelihoods = new double[validDestinations.length];
             double totalWeight = 0;
             for (int i = 0; i < validDestinations.length; i++) {
                 likelihoods[i] = averagePassengersAtStopPerminute[i];

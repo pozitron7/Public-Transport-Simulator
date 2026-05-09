@@ -1,0 +1,8 @@
+# this file conteins all possible routes it should have folowing format
+#id of route ; list of stopsids divided by ; list of waiting time at each stop in seconds divided by;
+1; 1;4;5;3;2; 20;20;30;30;30 
+2; 3;2;5; 30;30;30
+3; 4;5;3; 30;30;30
+4; 2;3;5;4;1 30;30;30;20;20
+5; 5;2;3 30;30;30
+6; 3;5;4; 30;30;30

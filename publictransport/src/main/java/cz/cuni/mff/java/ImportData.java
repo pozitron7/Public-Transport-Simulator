@@ -72,7 +72,7 @@ public class ImportData {
                 double y = Double.parseDouble(parts[2]);
                 String name = parts[3];
                 VehicleTypes type = VehicleTypes.valueOf(parts[4]);
-                places[i] = new Stop(name, id, new Coordinates(x, y));
+                places[i] = new Stop(name, id, new Coordinates(x, y), type);
             }
             catch (Exception e) {
                 System.err.println("Error parsing line " + (i+1) + ": " + lines.get(i));

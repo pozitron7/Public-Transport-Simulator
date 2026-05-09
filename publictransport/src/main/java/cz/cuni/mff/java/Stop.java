@@ -1,7 +1,9 @@
 package cz.cuni.mff.java;
 
 public class Stop extends Place {
-    public Stop(String name, int id, Coordinates coordinates) {
+    VehicleTypes type;
+    public Stop(String name, int id, Coordinates coordinates, VehicleTypes type) {
         super(name, id, coordinates);
+        this.type = type;
     }
 }

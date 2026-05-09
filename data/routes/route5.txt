@@ -1,0 +1,11 @@
+# this file conteins one route of one vehicle, its name should be route id of route, it should have folowing format
+#id of route
+#id of vehicle
+#start time in seconds from begining of day
+# list of stopsids divided by ;
+# list of waiting time at each stop in seconds divided by;
+5
+5
+22900
+3;2
+30;30

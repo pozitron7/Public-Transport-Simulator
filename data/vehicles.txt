@@ -1,0 +1,8 @@
+# This file contains list of vehicles that are aviable in our transport network, they are stored in folowing format
+# ID is uniq int, TYPE is (TRAM|METRO|BUS), capacity is int, pricePerKm int in Czk, Model optional parametr if not entered defeault, history is optional
+# if you want to omit optional parametrs model and history write - insted
+# ID;TYPE;capacity;pricePerKm;model;history
+1;BUS;50;25;-;-
+2;BUS;50;25;-;-
+3;BUS;80;35;-;-
+4;BUS;90;35;-;-

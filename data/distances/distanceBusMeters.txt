@@ -1,0 +1,14 @@
+# this files contains distances in time and space of stops for one vehicle TYPE 
+# lines starting with # are ignored and distancebusmeters.txt has folowing format:
+# first row contains TYPE of vehicle we define distances for
+# second row contains type of distance options are: SECONDS or METERS
+# third row list of stopsids in same order as is distance matrix, row coresponds to from, column to where
+# then n*n matrix of distances between stops, it some distance is undefined write -1 
+BUS
+METERS
+1;2;3;4;5
+0;-1;-1;1000;-1
+-1;0;-1;-1;3100
+-1;800;0;-1;-1
+-1;-1;-1;0;700
+-1;-1;2400;700;0

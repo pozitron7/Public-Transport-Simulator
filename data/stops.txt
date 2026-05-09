@@ -1,0 +1,9 @@
+# this file contains list of places stops and depos lines starting with # are ingored
+# places have folowing format
+# where id is unuq int, xcoordinate and ycoordinate are doubles, name is string and TYPE is type of vehicle alowed so TRAM or BUS or METRO
+# id;xcoordinate;ycoordinate;name;type
+1;25;25;Divoká Šárka;BUS
+2;34;45;Muzeum;BUS
+3;12;16;Hlavní Nádraží;BUS
+4;1;24;Petřiny;BUS
+5;34;21;Nádraží Veleslavín;BUS

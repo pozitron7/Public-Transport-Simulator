@@ -30,6 +30,9 @@ public class ImportData {
         for (int i = 0; i < lines.size(); i++) {
             try{
                 String[] parts = lines.get(i).split(";");
+                for (int j = 0; j < parts.length; j++) {
+                    parts[j] = parts[j].trim();
+                }
                 int id = Integer.parseInt(parts[0]);
                 VehicleTypes type = VehicleTypes.valueOf(parts[1]);
                 int capacity = Integer.parseInt(parts[2]);
@@ -61,6 +64,9 @@ public class ImportData {
         for (int i = 0; i < lines.size(); i++) {
             try{
                 String[] parts = lines.get(i).split(";");
+                for (int j = 0; j < parts.length; j++) {
+                    parts[j] = parts[j].trim();
+                }
                 int id = Integer.parseInt(parts[0]);
                 double x = Double.parseDouble(parts[1]);
                 double y = Double.parseDouble(parts[2]);
@@ -75,5 +81,5 @@ public class ImportData {
         }
         return places;
     }
-    
+
 }

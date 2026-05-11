@@ -3,7 +3,9 @@
 # first row contains TYPE of vehicle we define distances for
 # second row contains type of distance options are: SECONDS or METERS
 # third row list of stopsids in same order as is distance matrix, row coresponds to from, column to where
-# then n*n matrix of distances between stops, it some distance is undefined write -1 
+# then n*n matrix of distances between stops in meters, it some distance is undefined write -1 
+# then empty lines
+# then n*n matrix of travel time between stops in seconds, it some distance is undefined write -1 
 BUS
 METERS
 1;2;3;4;5
@@ -12,3 +14,9 @@ METERS
 -1;800;0;-1;2400
 1000;-1;-1;0;700
 -1;3100;2400;700;0
+
+0;-1;-1;100;-1
+-1;0;80;-1;270
+-1;80;0;-1;220
+100;-1;-1;0;85
+-1;270;220;85;0

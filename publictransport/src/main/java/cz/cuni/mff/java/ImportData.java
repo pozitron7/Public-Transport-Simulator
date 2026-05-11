@@ -24,6 +24,16 @@ public class ImportData {
             return List.of();
         }
     }
+    private int parseTimeToSeconds(String time) {
+        String[] parts = time.trim().split(":");
+        if (parts.length != 3) {
+            throw new IllegalArgumentException("Invalid time format: " + time);
+        }
+        int hours = Integer.parseInt(parts[0]);
+        int minutes = Integer.parseInt(parts[1]);
+        int seconds = Integer.parseInt(parts[2]);
+        return hours * 3600 + minutes * 60 + seconds;
+    }
     public Vehicle [] importVehicleData(String filePath) {
         // froamt of vehicle file # ID;TYPE;capacity;pricePerKm;model;history
         List<String> lines = readDataFromFile(filePath);
@@ -81,6 +91,36 @@ public class ImportData {
             }
         }
         return places;
+    }
+    //# first row contains TYPE of vehicle we define distances for
+    //# second row list of stopsids in same order as is distance matrix, row coresponds to from, column to where
+    //# then n*n matrix of distances between stops, it some distance is undefined write -1 
+    //# then empty lines
+    //# then n*n matrix of travel time between stops in seconds, it some distance is undefined write -1 
+    public DistanceManager importDistanceData(String filePath) {
+        List<String> lines = readDataFromFile(filePath);
+        VehicleTypes type = VehicleTypes.valueOf(lines.get(0).trim());
+        String[] stopIdsStr = lines.get(1).trim().split(";");
+        int[] stopIds = new int[stopIdsStr.length];
+        for (int i = 0; i < stopIdsStr.length; i++) { stopIds[i] = Integer.parseInt(stopIdsStr[i].trim()); }
+        int [][] distanceMatrixMeters = new int[stopIds.length][stopIds.length];
+        int [][] distanceMatrixSeconds = new int[stopIds.length][stopIds.length];
+        for (int i = 0; i < stopIds.length; i++) {
+            String[] distanceRow = lines.get(2 + i).trim().split(";");
+            for (int j = 0; j < stopIds.length; j++) {
+                distanceMatrixMeters[i][j] = Integer.parseInt(distanceRow[j].trim());
+            }
+        }
+        for (int i = 0; i < stopIds.length; i++) {
+            String[] timeRow = lines.get(2 + stopIds.length + i).trim().split(";");
+            for (int j = 0; j < stopIds.length; j++) {
+                distanceMatrixSeconds[i][j] = Integer.parseInt(timeRow[j].trim());
+            }
+        }
+        Place[] places = new Place[stopIds.length];
+        // we need to create place list insted of stops id
+        
+        return new DistanceManager(type, places, distanceMatrixMeters, distanceMatrixSeconds);
     }
 
 }

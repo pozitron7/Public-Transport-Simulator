@@ -1,6 +1,7 @@
 package cz.cuni.mff.java;
 
 public class DistanceManager {
+    VehicleTypes type;
     Place[] places;
     int [][] distanceMatrixSeconds;
     int [][] distanceMatrixMeters;
@@ -11,8 +12,9 @@ public class DistanceManager {
  * @param distanceMatrixMeters The distance matrix in meters rows corespond to from, columns to so we index like distanceMatrixMeters[fromIndex][toIndex].
  * distance matricies may contain -1 for indefined distances
     */
-    public DistanceManager(Place[] places, int[][] distanceMatrixSeconds, int[][] distanceMatrixMeters) {
+    public DistanceManager(VehicleTypes type, Place[] places, int[][] distanceMatrixSeconds, int[][] distanceMatrixMeters) {
         //distanceMatrixMeters[fromIndex][toIndex]
+        this.type = type;
         this.places = places;
         this.distanceMatrixSeconds = distanceMatrixSeconds;
         this.distanceMatrixMeters = distanceMatrixMeters;

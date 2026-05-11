@@ -25,4 +25,5 @@ public abstract class Place {
     public boolean equals(Place other) {
         return this.id == other.id;
     }
+    public abstract VehicleTypes getType();
 }

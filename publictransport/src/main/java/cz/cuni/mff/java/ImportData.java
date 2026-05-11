@@ -9,15 +9,16 @@ public class ImportData {
     DistanceManager distanceManager;
     private List<String> readDataFromFile(String filePath) {
         try {
-            List<String> lines = Files.readAllLines(Path.of(filePath));
-            for (int i = 0; i < lines.size(); i++) {
-                lines.set(i, lines.get(i).trim());
-                if (lines.get(i).isEmpty() || lines.get(i).startsWith("#")) {
-                    lines.remove(i);
-                    i--;
+            List<String> rawLines = Files.readAllLines(Path.of(filePath));
+            List<String> cleanLines = new java.util.ArrayList<>();
+
+            for (String line : rawLines) {
+                String trimmed = line.trim();
+                if (!trimmed.isEmpty() && !trimmed.startsWith("#")) {
+                    cleanLines.add(trimmed);
                 }
             }
-            return lines;
+            return cleanLines;
         } catch (java.io.IOException e) {
             e.printStackTrace();
             return List.of();

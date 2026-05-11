@@ -6,4 +6,7 @@ public class Stop extends Place {
         super(name, id, coordinates);
         this.type = type;
     }
+    public VehicleTypes getType() {
+        return type;
+    }
 }

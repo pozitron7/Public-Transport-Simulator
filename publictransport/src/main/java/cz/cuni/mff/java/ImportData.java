@@ -6,7 +6,9 @@ import java.util.List;
 public class ImportData {
     Vehicle[] vehicles;
     Place[] places;
-    DistanceManager distanceManager;
+    DistanceManager [] distanceManager;
+    Route[] routes;
+    ScheduledTrip [] schedule;
     private List<String> readDataFromFile(String filePath) {
         try {
             List<String> rawLines = Files.readAllLines(Path.of(filePath));
@@ -170,5 +172,48 @@ public class ImportData {
         }
         return routes;
     }
+    //#ID vehicle; ID route; start time in 24h format hour:minute:second xx:xx:xx
+    public ScheduledTrip [] importScheduleData(String filePath, Vehicle[] vehicles, Route[] routes) {
+        List<String> lines = readDataFromFile(filePath);
+        ScheduledTrip[] schedule = new ScheduledTrip[lines.size()];
+        for (int i = 0; i < lines.size(); i++) {
+            try{
+                String[] parts = lines.get(i).trim().split(";");
+                for (int j = 0; j < parts.length; j++) {
+                    parts[j] = parts[j].trim();
+                }
+                int vehicleId = Integer.parseInt(parts[0]);
+                int routeId = Integer.parseInt(parts[1]);
+                int startTimeSeconds = parseTimeToSeconds(parts[2]);
+                // now we find objects matching its ids
+                Vehicle vehicle = null;
+                for (Vehicle v : vehicles) {
+                    if (v.getId() == vehicleId) {
+                        vehicle = v;
+                        break;
+                    }
+                }
+                if (vehicle == null) {
+                    throw new IllegalArgumentException("Vehicle ID " + vehicleId + " not found in vehicles data!");
+                }
+                Route route = null;
+                for (Route r : routes) {
+                    if (r.getId() == routeId) {
+                        route = r;
+                        break;
+                    }
+                }
+                if (route == null) {
+                    throw new IllegalArgumentException("Route ID " + routeId + " not found in routes data!");
+                }
+                schedule[i] = new ScheduledTrip(vehicle, route, startTimeSeconds);
+            }
+            catch (Exception e) {
+                throw new IllegalArgumentException("Error parsing line " + (i+1) + ": " + lines.get(i), e);
+            }
+        }
+        return schedule;
+    }
+    
 
 }

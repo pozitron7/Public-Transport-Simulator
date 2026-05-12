@@ -1,0 +1,2 @@
+# this files contains average number of passager arriving at given stop every minute and has folowing format
+# stop id; average number of passagers per minute (can be double)

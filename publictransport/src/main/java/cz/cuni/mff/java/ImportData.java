@@ -2,13 +2,14 @@ package cz.cuni.mff.java;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-
+import java.util.Map;
 public class ImportData {
     Vehicle[] vehicles;
     Place[] places;
     DistanceManager [] distanceManager;
     Route[] routes;
     ScheduledTrip [] schedule;
+    Map<Integer, Place> placeById;
     private List<String> readDataFromFile(String filePath) {
         try {
             List<String> rawLines = Files.readAllLines(Path.of(filePath));
@@ -38,19 +39,21 @@ public class ImportData {
     }
     private Place [] findPlacesByIds(int[] ids) {
         Place[] result = new Place[ids.length];
+        if (places == null) {
+            throw new IllegalStateException("Places data must be imported before finding places by ids.");
+        }
+        if (placeById == null) {
+            placeById = new java.util.HashMap<>();
+            for (Place p : places) {
+                placeById.put(p.getId(), p);
+            }
+        }
         for (int i = 0; i < ids.length; i++) {
-            int currentId = ids[i];
-            boolean found = false;
-            for (Place p : this.places) {
-                if (p.getId() == currentId) {
-                    result[i] = p;
-                    found = true;
-                    break;
-                }
+            Place place = placeById.get(ids[i]);
+            if (place == null) {
+                throw new IllegalArgumentException("Place ID " + ids[i] + " not found.");
             }
-            if (!found) {
-                throw new IllegalArgumentException("Stop ID " + currentId + " not found in stops.txt!");
-            }
+            result[i] = place;
         }
         return result;
     }

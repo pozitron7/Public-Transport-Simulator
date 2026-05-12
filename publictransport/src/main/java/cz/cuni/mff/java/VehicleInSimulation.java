@@ -8,22 +8,33 @@ public class VehicleInSimulation {
     private int capacity;
     private String history;
     private int pricePerKm;
-    private Place [] PlannedStops;
+    private Place [] plannedStops;
+    private Route route;
     private Place [] currentPassagers; // each represented as his final stop in array
-    private int DistanceTraveledMeters;
+    private int distanceTraveledMeters;
     private Coordinates currentCoordinates;
-    public VehicleInSimulation(Vehicle vehicle, Place [] plannedStops) {
+    private VehicleState state;
+    public VehicleInSimulation(Vehicle vehicle, Route route) {
         this.id = vehicle.getId();
         this.type = vehicle.getType();
         this.capacity = vehicle.getCapacity();
         this.model = vehicle.getModel();
         this.history = vehicle.getHistory();
         this.pricePerKm = vehicle.getPricePerKm();
-        this.PlannedStops = plannedStops;
+        this.route = route;
+        this.plannedStops = route.getStops();
         this.currentPassagers = new Place[capacity];
-        this.DistanceTraveledMeters = 0;
+        this.distanceTraveledMeters = 0;
+        this.state = VehicleState.WAITING_AT_STOP;
         this.currentCoordinates = plannedStops[0].getCoordinates();
     }
+    public enum VehicleState { 
+        DRIVING, 
+        WAITING_AT_STOP, 
+        FINISHED 
+    }
+    
+    // defining getters and setters for all fields
     public int getId() {
         return id;
     }
@@ -43,26 +54,38 @@ public class VehicleInSimulation {
         return pricePerKm;
     }
     public Place[] getPlannedStops() {
-        return PlannedStops;
+        return plannedStops;
     }
     public Place[] getCurrentPassagers() {
         return currentPassagers;
     }
     public int getDistanceTraveledMeters() {
-        return DistanceTraveledMeters;
+        return distanceTraveledMeters;
     }
     public Coordinates getCurrentCoordinates() {
         return currentCoordinates;
+    }
+    public VehicleState getState() {
+        return state;
+    }
+    public void setState(VehicleState state) {
+        this.state = state;
+    }
+    public Route getRoute() {
+        return route;
     }
     public void updateDistanceTraveledMeters(int distance) {
         if (distance < 0) {
             throw new IllegalArgumentException("Distance cannot be negative");
         }
-        this.DistanceTraveledMeters += distance;
+        this.distanceTraveledMeters += distance;
     }
     public void addHistory(String history) {
         this.history += history;
     }
+
+
+    // logic for passager entering and exiting the vehicle
     public void passagersExiting(Place stop){ 
         for (int i = 0; i < currentPassagers.length; i++) {
             if (currentPassagers[i] != null && currentPassagers[i].equals(stop)) {
@@ -70,12 +93,10 @@ public class VehicleInSimulation {
             }
         }
     }
-    
-    
     public Place[] passagersEntering(Place[] newPassagers) { // try to board as many passagers as possible and return rest of them
         int boardedCount = 0;
         for (int i = 0; i < currentPassagers.length && boardedCount < newPassagers.length; i++) {
-            if (currentPassagers[i] == null && newPassagers[i] != null && Arrays.asList(PlannedStops).contains(newPassagers[i])) {
+            if (currentPassagers[i] == null && newPassagers[i] != null && Arrays.asList(plannedStops).contains(newPassagers[i])) {
                 currentPassagers[i] = newPassagers[boardedCount];
                 boardedCount++; 
             }
@@ -88,12 +109,14 @@ public class VehicleInSimulation {
     public int howManyPassagerWantToRideWithMe(Place [] Passagers){
         int count = 0;
         for (Place passager : Passagers) {
-            if (Arrays.asList(PlannedStops).contains(passager)) {
+            if (Arrays.asList(plannedStops).contains(passager)) {
                 count++;
             }
         }
         return count;
     }
+
+
     public void updateCurrentCoordinates(Place stop) {
         this.currentCoordinates = stop.getCoordinates();
     }

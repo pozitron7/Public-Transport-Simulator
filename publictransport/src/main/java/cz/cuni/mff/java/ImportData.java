@@ -10,6 +10,7 @@ public class ImportData {
     Route[] routes;
     ScheduledTrip [] schedule;
     Map<Integer, Place> placeById;
+    PassagerGeneration passagerGeneration;
     private List<String> readDataFromFile(String filePath) {
         try {
             List<String> rawLines = Files.readAllLines(Path.of(filePath));
@@ -176,7 +177,7 @@ public class ImportData {
         return routes;
     }
     //#ID vehicle; ID route; start time in 24h format hour:minute:second xx:xx:xx
-    public ScheduledTrip [] importScheduleData(String filePath, Vehicle[] vehicles, Route[] routes) {
+    public ScheduledTrip [] importScheduleData(String filePath) {
         List<String> lines = readDataFromFile(filePath);
         ScheduledTrip[] schedule = new ScheduledTrip[lines.size()];
         for (int i = 0; i < lines.size(); i++) {
@@ -236,5 +237,38 @@ public class ImportData {
         }
         stops = findPlacesByIds(stopIds);
         return new PassagerGeneration(stops, averagePassengersAtStopPerminute);
+    }
+    
+    public void importData(){
+        vehicles = importVehicleData("data/vehicles.txt");
+        places = importPlaceData("data/places.txt");
+        distanceManager = new DistanceManager[1];
+        distanceManager[0] = importDistanceData("data/distancesBus.txt");
+        routes = importRouteData("data/routes.txt");
+        schedule = importScheduleData("data/schedule.txt");
+        passagerGeneration = importPassagerGenerationData("data/passengerGeneration.txt");
+        placeById = new java.util.HashMap<>();
+        for (Place p : places) {
+            placeById.put(p.getId(), p);
+        }
+    }
+    // write all getters for all data so we can access it from simulator
+    public Vehicle[] getVehicles() {
+        return vehicles;
+    }
+    public Place[] getPlaces() {
+        return places;
+    }
+    public DistanceManager[] getDistanceManager() {
+        return distanceManager;
+    }
+    public Route[] getRoutes() {
+        return routes;
+    }
+    public ScheduledTrip[] getSchedule() {
+        return schedule;
+    }
+    public PassagerGeneration getPassagerGeneration() {
+        return passagerGeneration;
     }
 }

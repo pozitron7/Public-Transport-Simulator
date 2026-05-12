@@ -34,6 +34,24 @@ public class ImportData {
         int seconds = Integer.parseInt(parts[2]);
         return hours * 3600 + minutes * 60 + seconds;
     }
+    private Place [] findPlacesByIds(int[] ids) {
+        Place[] result = new Place[ids.length];
+        for (int i = 0; i < ids.length; i++) {
+            int currentId = ids[i];
+            boolean found = false;
+            for (Place p : this.places) {
+                if (p.getId() == currentId) {
+                    result[i] = p;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                throw new IllegalArgumentException("Stop ID " + currentId + " not found in stops.txt!");
+            }
+        }
+        return result;
+    }
     public Vehicle [] importVehicleData(String filePath) {
         // froamt of vehicle file # ID;TYPE;capacity;pricePerKm;model;history
         List<String> lines = readDataFromFile(filePath);
@@ -117,10 +135,40 @@ public class ImportData {
                 distanceMatrixSeconds[i][j] = Integer.parseInt(timeRow[j].trim());
             }
         }
-        Place[] places = new Place[stopIds.length];
-        // we need to create place list insted of stops id
+        Place[] places = findPlacesByIds(stopIds);
         
+
         return new DistanceManager(type, places, distanceMatrixMeters, distanceMatrixSeconds);
+    }
+    //#id of route ; list of stopsids divided by ; list of waiting time at each stop in seconds divided by;
+    public Route [] importRouteData(String filePath) {
+        List<String> lines = readDataFromFile(filePath);
+        Route[] routes = new Route[lines.size()];
+        for (int i = 0; i < lines.size(); i++) {
+            try{
+                String[] parts = lines.get(i).split(";");
+                for (int j = 0; j < parts.length; j++) {
+                    parts[j] = parts[j].trim();
+                }
+                int routeId = Integer.parseInt(parts[0]);
+                int numStops = (parts.length - 1) / 2;
+                int [] stopsIds = new int[numStops];
+                int [] waitTimes = new int[numStops];
+                for (int j = 0; j < numStops; j++) {
+                    stopsIds[j] = Integer.parseInt(parts[1 + j]);
+                }
+                for (int j = 0; j < numStops; j++) {
+                    waitTimes[j] = Integer.parseInt(parts[1 + numStops + j]);
+                }
+                Place[] routeStops = findPlacesByIds(stopsIds);
+                routes[i] = new Route(routeId, routeStops, waitTimes);
+                
+            }
+            catch (Exception e) {
+                throw new IllegalArgumentException("Error parsing line " + (i+1) + ": " + lines.get(i), e);
+            }
+        }
+        return routes;
     }
 
 }

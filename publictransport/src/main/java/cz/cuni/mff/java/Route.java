@@ -2,10 +2,10 @@ package cz.cuni.mff.java;
 
 public class Route {
     private int id;
-    private Stop[] stops;
+    private Place[] stops;
     private int[] waitTimesSeconds;
 
-    public Route(int id, Stop[] stops, int[] waitTimesSeconds) {
+    public Route(int id, Place[] stops, int[] waitTimesSeconds) {
         this.id = id;
         this.stops = stops;
         this.waitTimesSeconds = waitTimesSeconds;
@@ -13,7 +13,7 @@ public class Route {
     public int getId() {
         return id;
     }
-    public Stop[] getStops() {
+    public Place[] getStops() {
         return stops;
     }
     public int[] getWaitTimesSeconds() {

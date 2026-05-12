@@ -214,6 +214,24 @@ public class ImportData {
         }
         return schedule;
     }
-    
 
+    public PassagerGeneration importPassagerGenerationData(String filePath) {
+        List<String> lines = readDataFromFile(filePath);
+        double [] averagePassengersAtStopPerminute = new double[lines.size()];
+        int [] stopIds = new int[lines.size()];
+        Place[] stops = new Place[lines.size()];
+        for (int i = 0; i < lines.size(); i++) {
+            try{
+                String line = lines.get(i).trim();
+                String [] parts = line.split(";");
+                stopIds[i] = Integer.parseInt(parts[0].trim());
+                averagePassengersAtStopPerminute[i] = Double.parseDouble(parts[1].trim());
+            }
+            catch (Exception e) {
+                throw new IllegalArgumentException("Error parsing line " + (i+1) + ": " + lines.get(i), e);
+            }
+        }
+        stops = findPlacesByIds(stopIds);
+        return new PassagerGeneration(stops, averagePassengersAtStopPerminute);
+    }
 }

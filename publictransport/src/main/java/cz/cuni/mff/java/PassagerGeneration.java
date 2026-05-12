@@ -1,15 +1,15 @@
 package cz.cuni.mff.java;
 
 public class PassagerGeneration {
-    Stop[] stops;
+    Place[] stops;
     double [] averagePassengersAtStopPerminute;
     // expects order of stops to be the same as order of average passengers at stop per minute
-    public PassagerGeneration(Stop[] stops, double[] averagePassengersAtStopPerminute) {
+    public PassagerGeneration(Place[] stops, double[] averagePassengersAtStopPerminute) {
         this.stops = stops;
         this.averagePassengersAtStopPerminute = averagePassengersAtStopPerminute;
 
     }
-    private int getIndexOfStop(Stop stop) {
+    private int getIndexOfStop(Place stop) {
         for (int i = 0; i < stops.length; i++) {
             if (stops[i].equals(stop)) {
                 return i;
@@ -17,11 +17,11 @@ public class PassagerGeneration {
         }
         throw new IllegalArgumentException("Stop not found in the list of stops.");
     }
-    public double getAveragePassengersAtStopPerMinute(Stop stop) {
+    public double getAveragePassengersAtStopPerMinute(Place stop) {
         int index = getIndexOfStop(stop);
         return averagePassengersAtStopPerminute[index];
     }
-    public int getNumberOfPassagersThatAppearAtStopPoason(int timeIntervalSeconds, Stop stop){
+    public int getNumberOfPassagersThatAppearAtStopPoason(int timeIntervalSeconds, Place stop){
         double averagePerMinute = getAveragePassengersAtStopPerMinute(stop);
         double lambda = averagePerMinute * (timeIntervalSeconds / 60.0);
 

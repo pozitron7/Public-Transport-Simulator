@@ -1,19 +1,27 @@
 package cz.cuni.mff.java;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+
 public class Simulator {
     private RouteManager routeManager;
     private VehicleInSimulation[] sortedVehiclesInSimulation; // sorted by departure time, each vehicle ropresents one trip in schedule
     private StopInSimulation[] stopsInSimulation;
     private PassagerGeneration passagerGeneration;
     private List<VehicleInSimulation> vehiclesCurrentlyInSimulation;
-    private Dicti
-    public Simulator(RouteManager routeManager, PassagerGeneration passagerGeneration) {
+    private Map<VehicleTypes, DistanceManager> distanceManagers;
+    public Simulator(RouteManager routeManager, PassagerGeneration passagerGeneration, DistanceManager [] distanceManagers) {
         this.routeManager = routeManager;
         this.passagerGeneration = passagerGeneration;
         this.sortedVehiclesInSimulation = createVehicleInSimulation(routeManager);
         this.stopsInSimulation = createStopsInSimulation(routeManager);
         this.vehiclesCurrentlyInSimulation = new ArrayList<>();
+        initializeDistanceManagers(distanceManagers);
+    }
+    private void initializeDistanceManagers(DistanceManager [] distanceManagers) {
+        for (DistanceManager dm : distanceManagers) {
+            this.distanceManagers.put(dm.getType(), dm);
+        }
     }
     private VehicleInSimulation [] createVehicleInSimulation(RouteManager routeManager) {
         VehicleInSimulation [] vehiclesInSimulation = new VehicleInSimulation[routeManager.getNumberOfTrips()];
@@ -33,11 +41,68 @@ public class Simulator {
         }
         return stopsInSimulation;
     }
-    private void updateVehicleState(VehicleInSimulation vehicle, int currentTimeSeconds) {
-        // here we can update the state of the vehicle, for example we can check if it should start driving, if it should arrive at a stop, if it should finish its route, etc.
+    // function expects that event changed and we calculate what is next event for this vehicle and update its state and time of next state change
+   private void updateVehicleState(VehicleInSimulation vehicle, int currentTimeSeconds) {
+        switch (vehicle.getState()) {
+            case VehicleInSimulation.VehicleState.WAITING_AT_STOP: {
+                Place currentStop = vehicle.getCurrentPlace();
+                int stopindex = 0;
+                for (int i = 0; i < vehicle.getPlannedStops().length; i++) {
+                    if (vehicle.getPlannedStops()[i].equals(currentStop)) {
+                        stopindex = i;
+                        break;
+                    }
+                }
+                // vehicle finished journey
+                if (stopindex == vehicle.getPlannedStops().length - 1) {
+                    vehicle.setTimeOfNextStateChange(Integer.MAX_VALUE);
+                    vehicle.updateCurrentPlace(vehicle.getPlannedStops()[stopindex]);
+                    vehicle.setState(VehicleInSimulation.VehicleState.FINISHED);
+                    // we remove vehicle from simulation
+                    vehiclesCurrentlyInSimulation.remove(vehicle);
+                }
+                // we set vehicle to driving
+                else {
+                    vehicle.setState(VehicleInSimulation.VehicleState.DRIVING);
+                    int timeToNextStop = distanceManagers.get(vehicle.getType()).getDistanceSeconds(vehicle.getPlannedStops()[stopindex], vehicle.getPlannedStops()[stopindex+1]);
+                    vehicle.setTimeOfNextStateChange(currentTimeSeconds + timeToNextStop);
+                    // current place stays same until we update it when vehicle arrives at next stop
+                }
+                
+                break;
+            }
+        
+            case VehicleInSimulation.VehicleState.DRIVING: {
+                Place lastPlace = vehicle.getCurrentPlace();
+                int stopindex = 0;
+                for (int i = 0; i < vehicle.getPlannedStops().length; i++) {
+                    if (vehicle.getPlannedStops()[i].equals(lastPlace)) {
+                        stopindex = i;
+                        break;
+                    }
+                }
+                vehicle.updateCurrentPlace(vehicle.getPlannedStops()[stopindex+1]);
+                vehicle.setState(VehicleInSimulation.VehicleState.WAITING_AT_STOP);
+                int waitTimeSeconds = vehicle.getRoute().getWaitTimesSeconds()[stopindex+1];
+                vehicle.setTimeOfNextStateChange(currentTimeSeconds + waitTimeSeconds);
+                int distanceTraveled = distanceManagers.get(vehicle.getType()).getDistanceMeters(vehicle.getPlannedStops()[stopindex], vehicle.getPlannedStops()[stopindex+1]);
+                vehicle.updateDistanceTraveledMeters(distanceTraveled);
+                break;
+            }
+            default:
+                throw new IllegalStateException("Unexpected value: " + vehicle.getState());
+                
+            
+        }
     }
-    private void initializeSimulation(ImportData data) {
-        // here we can initialize any data structures we need for the simulation, for example we can create a map of place id to place object for quick access
+
+    private void initializeSimulation(int simulationStartInSeconds) {
+        vehiclesCurrentlyInSimulation = new ArrayList<>();
+        for (VehicleInSimulation vehicle : sortedVehiclesInSimulation) {
+            if (vehicle.getDepartureTimeSeconds() == simulationStartInSeconds) {
+                vehiclesCurrentlyInSimulation.add(vehicle);
+            }
+        }
     }
     private void updateSimulationState(int currentTimeSeconds) {
         // here we can update the state of the simulation, for example we can check if any new trips should start at this time and add them to the simulation
@@ -51,3 +116,5 @@ public class Simulator {
 // in each iteration we find all vehicles that should start at time and add them to simulation
 // in each iteration we check what vehicles arrived at some station so we need dict of expected arrivals
 // update states of some vehicles
+
+//small helper functions

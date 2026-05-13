@@ -13,7 +13,7 @@ public class VehicleInSimulation {
     private Route route;
     private Place [] currentPassagers; // each represented as his final stop in array
     private int distanceTraveledMeters;
-    private Coordinates currentCoordinates;
+    private Place currentPlace;
     private int timeOfNextStateChange;
     private VehicleState state;
     private int departureTimeSeconds; 
@@ -30,7 +30,7 @@ public class VehicleInSimulation {
         this.distanceTraveledMeters = 0;
         this.state = VehicleState.WAITING_AT_STOP;
         this.departureTimeSeconds = departureTimeSeconds;
-        this.currentCoordinates = plannedStops[0].getCoordinates();
+        this.currentPlace = plannedStops[0];
     }
     public enum VehicleState { 
         DRIVING, 
@@ -66,8 +66,11 @@ public class VehicleInSimulation {
     public int getDistanceTraveledMeters() {
         return distanceTraveledMeters;
     }
-    public Coordinates getCurrentCoordinates() {
-        return currentCoordinates;
+    public Place getCurrentPlace() {
+        return currentPlace;
+    }
+    public void updateCurrentPlace(Place stop) {
+        this.currentPlace = stop;
     }
     public VehicleState getState() {
         return state;
@@ -130,7 +133,5 @@ public class VehicleInSimulation {
     }
 
 
-    public void updateCurrentCoordinates(Place stop) {
-        this.currentCoordinates = stop.getCoordinates();
-    }
+    
 }

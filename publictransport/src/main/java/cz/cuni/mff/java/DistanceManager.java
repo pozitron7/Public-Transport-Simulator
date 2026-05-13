@@ -37,4 +37,7 @@ public class DistanceManager {
         int toIndex = getPlaceIndex(to);
         return distanceMatrixMeters[fromIndex][toIndex];
     }
+    public VehicleTypes getType() {
+        return type;
+    }
 }

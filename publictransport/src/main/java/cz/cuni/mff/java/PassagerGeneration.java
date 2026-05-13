@@ -47,12 +47,12 @@ public class PassagerGeneration {
         if ( numberOfPassagersToGenerate > 0) {
             double [] likelihoods = new double[validDestinations.length];
             double totalWeight = 0;
+            
             for (int i = 0; i < validDestinations.length; i++) {
-                likelihoods[i] = averagePassengersAtStopPerminute[i];
+                likelihoods[i] = getAveragePassengersAtStopPerMinute(validDestinations[i]);
+                
                 totalWeight += likelihoods[i];
             }
-            // we sum likelihoods and generate number between 0 and total weight,
-            // then final stops are distributed based on density of ikelihoods
             Place [] generatedPassagers = new Place[numberOfPassagersToGenerate];
             java.util.Random random = new java.util.Random();
 
@@ -75,6 +75,5 @@ public class PassagerGeneration {
         else {
             throw new IllegalArgumentException("Number of passagers to generate cannot be negative.");
         }
-
     }
 }

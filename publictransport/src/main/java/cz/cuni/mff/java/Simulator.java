@@ -2,6 +2,8 @@ package cz.cuni.mff.java;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 
 public class Simulator {
     private RouteManager routeManager;
@@ -10,6 +12,7 @@ public class Simulator {
     private PassagerGeneration passagerGeneration;
     private List<VehicleInSimulation> vehiclesCurrentlyInSimulation;
     private Map<VehicleTypes, DistanceManager> distanceManagers;
+    private Map<Integer, java.util.Set<Place>> validDestinationsForStopId; // is used for passager generation
     public Simulator(RouteManager routeManager, PassagerGeneration passagerGeneration, DistanceManager [] distanceManagers) {
         this.routeManager = routeManager;
         this.passagerGeneration = passagerGeneration;
@@ -17,10 +20,33 @@ public class Simulator {
         this.stopsInSimulation = createStopsInSimulation(routeManager);
         this.vehiclesCurrentlyInSimulation = new ArrayList<>();
         initializeDistanceManagers(distanceManagers);
+        initializeValidDestinationsForStops();
     }
     private void initializeDistanceManagers(DistanceManager [] distanceManagers) {
         for (DistanceManager dm : distanceManagers) {
             this.distanceManagers.put(dm.getType(), dm);
+        }
+    }
+    private void initializeValidDestinationsForStops() {
+        this.validDestinationsForStopId = new java.util.HashMap<>();
+        Set<Integer> processedRoutes = new HashSet<>();
+        for (ScheduledTrip trip : routeManager.getSortedDailySchedule()) {
+            Route route = trip.getRoute();
+            if (processedRoutes.contains(route.getId())) {
+                continue;
+            }
+            processedRoutes.add(route.getId());
+            Place[] stops = route.getStops();
+            for (int i = 0; i < stops.length; i++) {
+                Place currentStop = stops[i];
+            
+                validDestinationsForStopId.putIfAbsent(currentStop.getId(), new java.util.HashSet<>());
+                java.util.Set<Place> validDests = validDestinationsForStopId.get(currentStop.getId());
+                // we add all folowing stops in route
+                for (int j = i + 1; j < stops.length; j++) {
+                    validDests.add(stops[j]);
+                }
+            }
         }
     }
     private VehicleInSimulation [] createVehicleInSimulation(RouteManager routeManager) {
@@ -95,6 +121,15 @@ public class Simulator {
             
         }
     }
+    // ge generate random number of passagers that arived in timeWindow seconds at each stop
+    private void generatePassagersAtStops(int timeWindow) {
+        for (StopInSimulation stop : stopsInSimulation) {
+            int numberOfPassagersToGenerate = passagerGeneration.getNumberOfPassagersThatAppearAtStopPoason(timeWindow, stop);
+            Place [] validDestinations = validDestinationsForStopId.getOrDefault(stop.getId(), new java.util.HashSet<>()).toArray(new Place[0]);
+            Place [] passagers = passagerGeneration.generatePassagesWithFinalDestination(stop, validDestinations, numberOfPassagersToGenerate);
+            stop.addWaitingPassenger(passagers);
+        }
+    }
 
     private void initializeSimulation(int simulationStartInSeconds) {
         vehiclesCurrentlyInSimulation = new ArrayList<>();
@@ -105,7 +140,11 @@ public class Simulator {
         }
     }
     private void updateSimulationState(int currentTimeSeconds) {
-        // here we can update the state of the simulation, for example we can check if any new trips should start at this time and add them to the simulation
+        for (VehicleInSimulation vehicle : vehiclesCurrentlyInSimulation) {
+            if (vehicle.getTimeOfNextStateChange() == currentTimeSeconds) {
+                updateVehicleState(vehicle, currentTimeSeconds);
+            }
+        }
     }
     public void runSimulation(ImportData data, PassagerGeneration passagerGeneration, int simulationStartInSeconds, int simulationEndSeconds) {
         RouteManager routeManager = new RouteManager(List.of(data.schedule));

@@ -13,6 +13,10 @@ public class StopInSimulation extends Stop {
     public void addWaitingPassenger(Place [] passengers) {
         waitingPassengers.addAll(List.of(passengers));
     }
+    public void setWaitingPassengers(Place[] passengers) {
+        waitingPassengers.clear();
+        waitingPassengers.addAll(List.of(passengers));
+    }
     public void removeWaitingPassenger(Place[] passengers) {
         waitingPassengers.removeAll(List.of(passengers));
     }

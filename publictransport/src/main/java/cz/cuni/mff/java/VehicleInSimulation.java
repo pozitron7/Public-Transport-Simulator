@@ -102,14 +102,14 @@ public class VehicleInSimulation {
 
 
     // logic for passager entering and exiting the vehicle
-    public void passagersExiting(Place stop){ 
+    public void unloadPassagersAtStop(Place stop){ 
         for (int i = 0; i < currentPassagers.length; i++) {
             if (currentPassagers[i] != null && currentPassagers[i].equals(stop)) {
                 currentPassagers[i] = null;
             }
         }
     }
-    public Place[] passagersEntering(Place[] newPassagers) { // try to board as many passagers as possible and return rest of them
+    public Place[] loadPassagers(Place[] newPassagers) { // try to board as many passagers as possible and return rest of them
         int boardedCount = 0;
         for (int i = 0; i < currentPassagers.length && boardedCount < newPassagers.length; i++) {
             if (currentPassagers[i] == null && newPassagers[i] != null && Arrays.asList(plannedStops).contains(newPassagers[i])) {

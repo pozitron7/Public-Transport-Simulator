@@ -13,6 +13,7 @@ public class Simulator {
     private List<VehicleInSimulation> vehiclesCurrentlyInSimulation;
     private Map<VehicleTypes, DistanceManager> distanceManagers;
     private Map<Integer, java.util.Set<Place>> validDestinationsForStopId; // is used for passager generation
+    int numberOfPassagersLeftBehind = 0; // that is passager that wanted to board but could not becouse vehicle was full
     public Simulator(RouteManager routeManager, PassagerGeneration passagerGeneration, DistanceManager [] distanceManagers) {
         this.routeManager = routeManager;
         this.passagerGeneration = passagerGeneration;
@@ -131,6 +132,20 @@ public class Simulator {
         }
     }
 
+    private void loadAndUnloadPassagersAtStop(VehicleInSimulation vehicle, StopInSimulation stop) {
+        // unload passager
+        vehicle.unloadPassagersAtStop(stop);
+        // load passagers
+        List<Place> waitingPassagers = stop.getWaitingPassengers();
+        Place [] waitingPassagersArray = waitingPassagers.toArray(new Place[0]);
+        // this already loaded passagers
+        Place [] remainingPassagers = vehicle.loadPassagers(waitingPassagersArray);
+        // we update stop waiting passagers to remaining passagers that could not board
+        int numberOfPassagersLeftBehind = vehicle.howManyPassagerWantToRideWithMe(remainingPassagers);
+        this.numberOfPassagersLeftBehind += numberOfPassagersLeftBehind;
+        stop.setWaitingPassengers(remainingPassagers);
+
+    }
     private void initializeSimulation(int simulationStartInSeconds) {
         vehiclesCurrentlyInSimulation = new ArrayList<>();
         for (VehicleInSimulation vehicle : sortedVehiclesInSimulation) {

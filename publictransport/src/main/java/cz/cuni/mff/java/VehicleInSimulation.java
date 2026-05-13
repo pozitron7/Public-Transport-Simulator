@@ -30,7 +30,7 @@ public class VehicleInSimulation {
         this.distanceTraveledMeters = 0;
         this.state = VehicleState.WAITING_AT_STOP;
         this.departureTimeSeconds = departureTimeSeconds;
-        this.currentPlace = plannedStops[0];
+        this.currentPlace = null;
     }
     public enum VehicleState { 
         DRIVING, 

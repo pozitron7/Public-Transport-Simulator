@@ -8,7 +8,7 @@ import java.util.HashSet;
 public class Simulator {
     private RouteManager routeManager;
     private VehicleInSimulation[] sortedVehiclesInSimulation; // sorted by departure time, each vehicle ropresents one trip in schedule
-    private StopInSimulation[] stopsInSimulation;
+    private Map<Integer, StopInSimulation> getStopsInSimulations;
     private PassagerGeneration passagerGeneration;
     private List<VehicleInSimulation> vehiclesCurrentlyInSimulation;
     private Map<VehicleTypes, DistanceManager> distanceManagers;
@@ -18,7 +18,7 @@ public class Simulator {
         this.routeManager = routeManager;
         this.passagerGeneration = passagerGeneration;
         this.sortedVehiclesInSimulation = createVehicleInSimulation(routeManager);
-        this.stopsInSimulation = createStopsInSimulation(routeManager);
+        createStopsInSimulation(routeManager);
         this.vehiclesCurrentlyInSimulation = new ArrayList<>();
         initializeDistanceManagers(distanceManagers);
         initializeValidDestinationsForStops();
@@ -59,14 +59,14 @@ public class Simulator {
         }
         return vehiclesInSimulation;
     }
-    private StopInSimulation [] createStopsInSimulation(RouteManager routeManager) {
+    private void createStopsInSimulation(RouteManager routeManager) {
+        this.getStopsInSimulations = new java.util.HashMap<>();
         Place [] stops = routeManager.getStops();
-        StopInSimulation [] stopsInSimulation = new StopInSimulation[stops.length];
-        for (int i = 0; i < stops.length; i++) {
-            Place stop = stops[i];
-            stopsInSimulation[i] = new StopInSimulation(stop.getName(), stop.getId(), stop.getCoordinates(), stop.getType(), new ArrayList<>());
+        
+        for (Place stop : stops) {
+            StopInSimulation simStop = new StopInSimulation(stop.getName(), stop.getId(), stop.getCoordinates(), stop.getType(), new ArrayList<>());
+            this.getStopsInSimulations.put(stop.getId(), simStop);
         }
-        return stopsInSimulation;
     }
     // function expects that event changed and we calculate what is next event for this vehicle and update its state and time of next state change
    private void updateVehicleState(VehicleInSimulation vehicle, int currentTimeSeconds) {
@@ -108,7 +108,9 @@ public class Simulator {
                         break;
                     }
                 }
-                vehicle.updateCurrentPlace(vehicle.getPlannedStops()[stopindex+1]);
+                StopInSimulation stop = getStopsInSimulations.get(vehicle.getPlannedStops()[stopindex+1].getId());
+                 // we update vehicle current place to next stop
+                vehicle.updateCurrentPlace(stop);
                 vehicle.setState(VehicleInSimulation.VehicleState.WAITING_AT_STOP);
                 int waitTimeSeconds = vehicle.getRoute().getWaitTimesSeconds()[stopindex+1];
                 vehicle.setTimeOfNextStateChange(currentTimeSeconds + waitTimeSeconds);
@@ -122,9 +124,9 @@ public class Simulator {
             
         }
     }
-    // ge generate random number of passagers that arived in timeWindow seconds at each stop
+    // we generate random number of passagers that arived in timeWindow seconds at each stop
     private void generatePassagersAtStops(int timeWindow) {
-        for (StopInSimulation stop : stopsInSimulation) {
+        for (StopInSimulation stop : getStopsInSimulations.values()) {
             int numberOfPassagersToGenerate = passagerGeneration.getNumberOfPassagersThatAppearAtStopPoason(timeWindow, stop);
             Place [] validDestinations = validDestinationsForStopId.getOrDefault(stop.getId(), new java.util.HashSet<>()).toArray(new Place[0]);
             Place [] passagers = passagerGeneration.generatePassagesWithFinalDestination(stop, validDestinations, numberOfPassagersToGenerate);
@@ -151,6 +153,8 @@ public class Simulator {
         for (VehicleInSimulation vehicle : sortedVehiclesInSimulation) {
             if (vehicle.getDepartureTimeSeconds() == simulationStartInSeconds) {
                 vehiclesCurrentlyInSimulation.add(vehicle);
+                StopInSimulation stop = getStopsInSimulations.get(vehicle.getPlannedStops()[0].getId());
+                vehicle.updateCurrentPlace(stop);
             }
         }
     }
@@ -158,7 +162,14 @@ public class Simulator {
         for (VehicleInSimulation vehicle : vehiclesCurrentlyInSimulation) {
             if (vehicle.getTimeOfNextStateChange() == currentTimeSeconds) {
                 updateVehicleState(vehicle, currentTimeSeconds);
+                if (vehicle.getState() == VehicleInSimulation.VehicleState.WAITING_AT_STOP) {
+                    StopInSimulation stop = vehicle.getCurrentPlace() instanceof StopInSimulation ? (StopInSimulation) vehicle.getCurrentPlace() : null;
+                    
+                }
             }
+        }
+        if (currentTimeSeconds % 60 == 0) { 
+            generatePassagersAtStops(60);
         }
     }
     public void runSimulation(ImportData data, PassagerGeneration passagerGeneration, int simulationStartInSeconds, int simulationEndSeconds) {

@@ -6,11 +6,14 @@ public class Simulator {
     private VehicleInSimulation[] sortedVehiclesInSimulation; // sorted by departure time, each vehicle ropresents one trip in schedule
     private StopInSimulation[] stopsInSimulation;
     private PassagerGeneration passagerGeneration;
+    private List<VehicleInSimulation> vehiclesCurrentlyInSimulation;
+    private Dicti
     public Simulator(RouteManager routeManager, PassagerGeneration passagerGeneration) {
-       this.routeManager = routeManager;
-       this.passagerGeneration = passagerGeneration;
-       this.sortedVehiclesInSimulation = createVehicleInSimulation(routeManager);
-         this.stopsInSimulation = createStopsInSimulation(routeManager);
+        this.routeManager = routeManager;
+        this.passagerGeneration = passagerGeneration;
+        this.sortedVehiclesInSimulation = createVehicleInSimulation(routeManager);
+        this.stopsInSimulation = createStopsInSimulation(routeManager);
+        this.vehiclesCurrentlyInSimulation = new ArrayList<>();
     }
     private VehicleInSimulation [] createVehicleInSimulation(RouteManager routeManager) {
         VehicleInSimulation [] vehiclesInSimulation = new VehicleInSimulation[routeManager.getNumberOfTrips()];
@@ -30,6 +33,9 @@ public class Simulator {
         }
         return stopsInSimulation;
     }
+    private void updateVehicleState(VehicleInSimulation vehicle, int currentTimeSeconds) {
+        // here we can update the state of the vehicle, for example we can check if it should start driving, if it should arrive at a stop, if it should finish its route, etc.
+    }
     private void initializeSimulation(ImportData data) {
         // here we can initialize any data structures we need for the simulation, for example we can create a map of place id to place object for quick access
     }
@@ -42,3 +48,6 @@ public class Simulator {
             }
         
 }
+// in each iteration we find all vehicles that should start at time and add them to simulation
+// in each iteration we check what vehicles arrived at some station so we need dict of expected arrivals
+// update states of some vehicles

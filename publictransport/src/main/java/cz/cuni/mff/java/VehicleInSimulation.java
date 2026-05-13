@@ -14,6 +14,7 @@ public class VehicleInSimulation {
     private Place [] currentPassagers; // each represented as his final stop in array
     private int distanceTraveledMeters;
     private Coordinates currentCoordinates;
+    private int timeOfNextStateChange;
     private VehicleState state;
     private int departureTimeSeconds; 
     public VehicleInSimulation(Vehicle vehicle, Route route, int departureTimeSeconds) {
@@ -79,6 +80,12 @@ public class VehicleInSimulation {
     }
     public int getDepartureTimeSeconds() {
         return departureTimeSeconds;
+    }
+    public int getTimeOfNextStateChange() {
+        return timeOfNextStateChange;
+    }
+    public void setTimeOfNextStateChange(int timeOfNextStateChange) {
+        this.timeOfNextStateChange = timeOfNextStateChange;
     }
     public void updateDistanceTraveledMeters(int distance) {
         if (distance < 0) {

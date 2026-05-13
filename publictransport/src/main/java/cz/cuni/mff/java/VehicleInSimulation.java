@@ -1,6 +1,7 @@
 package cz.cuni.mff.java;
 import java.util.Arrays;
 
+// Represents a vehicle driving particular route in simulation.
 public class VehicleInSimulation {
     private int id;
     private VehicleTypes type;
@@ -14,7 +15,8 @@ public class VehicleInSimulation {
     private int distanceTraveledMeters;
     private Coordinates currentCoordinates;
     private VehicleState state;
-    public VehicleInSimulation(Vehicle vehicle, Route route) {
+    private int departureTimeSeconds; 
+    public VehicleInSimulation(Vehicle vehicle, Route route, int departureTimeSeconds) {
         this.id = vehicle.getId();
         this.type = vehicle.getType();
         this.capacity = vehicle.getCapacity();
@@ -26,6 +28,7 @@ public class VehicleInSimulation {
         this.currentPassagers = new Place[capacity];
         this.distanceTraveledMeters = 0;
         this.state = VehicleState.WAITING_AT_STOP;
+        this.departureTimeSeconds = departureTimeSeconds;
         this.currentCoordinates = plannedStops[0].getCoordinates();
     }
     public enum VehicleState { 
@@ -33,7 +36,7 @@ public class VehicleInSimulation {
         WAITING_AT_STOP, 
         FINISHED 
     }
-    
+
     // defining getters and setters for all fields
     public int getId() {
         return id;
@@ -73,6 +76,9 @@ public class VehicleInSimulation {
     }
     public Route getRoute() {
         return route;
+    }
+    public int getDepartureTimeSeconds() {
+        return departureTimeSeconds;
     }
     public void updateDistanceTraveledMeters(int distance) {
         if (distance < 0) {

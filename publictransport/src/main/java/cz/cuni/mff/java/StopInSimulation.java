@@ -3,8 +3,9 @@ import java.util.List;
 
 public class StopInSimulation extends Stop {
     private List<Place> waitingPassengers; //each passager is represented as its final destination
-    public StopInSimulation(String name, int id, Coordinates coordinates, VehicleTypes type) {
+    public StopInSimulation(String name, int id, Coordinates coordinates, VehicleTypes type, List<Place> waitingPassengers) {
         super(name, id, coordinates, type);
+        this.waitingPassengers = waitingPassengers;
     }
     public List<Place> getWaitingPassengers() {
         return waitingPassengers;

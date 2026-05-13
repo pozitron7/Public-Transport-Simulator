@@ -163,7 +163,9 @@ public class Simulator {
             if (vehicle.getTimeOfNextStateChange() == currentTimeSeconds) {
                 updateVehicleState(vehicle, currentTimeSeconds);
                 if (vehicle.getState() == VehicleInSimulation.VehicleState.WAITING_AT_STOP) {
-                    StopInSimulation stop = vehicle.getCurrentPlace() instanceof StopInSimulation ? (StopInSimulation) vehicle.getCurrentPlace() : null;
+                    Place stop = vehicle.getCurrentPlace();
+                    StopInSimulation simStop = (StopInSimulation) stop;
+                    loadAndUnloadPassagersAtStop(vehicle, simStop);
                     
                 }
             }
@@ -172,11 +174,12 @@ public class Simulator {
             generatePassagersAtStops(60);
         }
     }
-    public void runSimulation(ImportData data, PassagerGeneration passagerGeneration, int simulationStartInSeconds, int simulationEndSeconds) {
-        RouteManager routeManager = new RouteManager(List.of(data.schedule));
-        
-            }
-        
+    public void runSimulation(int simulationStartInSeconds, int simulationEndInSeconds) {
+        initializeSimulation(simulationStartInSeconds);
+        for (int currentTime = simulationStartInSeconds; currentTime <= simulationEndInSeconds; currentTime++) {
+            updateSimulationState(currentTime);
+        }
+    }
 }
 // in each iteration we find all vehicles that should start at time and add them to simulation
 // in each iteration we check what vehicles arrived at some station so we need dict of expected arrivals

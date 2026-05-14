@@ -159,7 +159,6 @@ public class Simulator {
                 vehiclesCurrentlyInSimulation.add(vehicle);
                 StopInSimulation stop = getStopsInSimulations.get(vehicle.getPlannedStops()[0].getId());
                 vehicle.updateCurrentPlace(stop);
-                vehiclesCurrentlyInSimulation.add(vehicle);
                 indexOfVehicleToAddNext++;
             }
             else {

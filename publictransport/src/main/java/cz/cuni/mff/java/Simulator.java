@@ -25,6 +25,7 @@ public class Simulator {
         initializeValidDestinationsForStops();
     }
     private void initializeDistanceManagers(DistanceManager [] distanceManagers) {
+        this.distanceManagers = new java.util.HashMap<>();
         for (DistanceManager dm : distanceManagers) {
             this.distanceManagers.put(dm.getType(), dm);
         }

@@ -19,6 +19,8 @@ public class VehicleInSimulation {
     private int timeOfNextStateChange;
     private VehicleState state;
     private int departureTimeSeconds; 
+    private int numberOfTransportedPassagers; // every passenger that entered and leaved vehicle is counted as transported
+
     public VehicleInSimulation(Vehicle vehicle, Route route, int departureTimeSeconds) {
         this.id = vehicle.getId();
         this.type = vehicle.getType();
@@ -30,14 +32,17 @@ public class VehicleInSimulation {
         this.plannedStops = route.getStops();
         this.currentPassagers = new Place[capacity];
         this.distanceTraveledMeters = 0;
-        this.state = VehicleState.WAITING_AT_STOP;
+        this.state = VehicleState.WAITING_FOR_START;
         this.departureTimeSeconds = departureTimeSeconds;
         this.currentPlace = null;
+        this.numberOfTransportedPassagers = 0;
+        this.timeOfNextStateChange = departureTimeSeconds;
     }
     public enum VehicleState { 
         DRIVING, 
         WAITING_AT_STOP, 
-        FINISHED 
+        FINISHED,
+        WAITING_FOR_START
     }
 
     // defining getters and setters for all fields
@@ -64,6 +69,9 @@ public class VehicleInSimulation {
     }
     public Place[] getCurrentPassagers() {
         return currentPassagers;
+    }
+    public int getNumberOfTransportedPassagers() {
+        return numberOfTransportedPassagers;
     }
     public int getDistanceTraveledMeters() {
         return distanceTraveledMeters;
@@ -107,6 +115,7 @@ public class VehicleInSimulation {
     public void unloadPassagersAtStop(Place stop){ 
         for (int i = 0; i < currentPassagers.length; i++) {
             if (currentPassagers[i] != null && currentPassagers[i].equals(stop)) {
+                numberOfTransportedPassagers++;
                 currentPassagers[i] = null;
             }
         }
@@ -135,7 +144,7 @@ public class VehicleInSimulation {
         for (Place boardedPassager : passegersBoarded) {
             unboardedPassagersList.remove(boardedPassager);// removes just first occurance
         }
-        
+
         return unboardedPassagersList.toArray(new Place[0]);
     }
     public int howManyPassagerWantToRideWithMe(Place [] Passagers){

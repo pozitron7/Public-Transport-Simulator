@@ -73,17 +73,18 @@ public class Simulator {
     }
     // function expects that event changed and we calculate what is next event for this vehicle and update its state and time of next state change
    private void updateVehicleState(VehicleInSimulation vehicle, int currentTimeSeconds) {
-        switch (vehicle.getState()) {
-            case VehicleInSimulation.VehicleState.WAITING_AT_STOP: {
-                Place currentStop = vehicle.getCurrentPlace();
+        Place lastPlace = vehicle.getCurrentPlace();
                 int stopindex = 0;
                 for (int i = 0; i < vehicle.getPlannedStops().length; i++) {
-                    if (vehicle.getPlannedStops()[i].equals(currentStop)) {
+                    if (vehicle.getPlannedStops()[i].equals(lastPlace)) {
                         stopindex = i;
                         break;
                     }
                 }
-                // vehicle finished journey
+        switch (vehicle.getState()) {
+            case VehicleInSimulation.VehicleState.WAITING_AT_STOP: {
+                
+                // vehicle finished journey, we update its state and remove it from simulation
                 if (stopindex == vehicle.getPlannedStops().length - 1) {
                     vehicle.setTimeOfNextStateChange(Integer.MAX_VALUE);
                     vehicle.updateCurrentPlace(vehicle.getPlannedStops()[stopindex]);
@@ -103,14 +104,6 @@ public class Simulator {
             }
         
             case VehicleInSimulation.VehicleState.DRIVING: {
-                Place lastPlace = vehicle.getCurrentPlace();
-                int stopindex = 0;
-                for (int i = 0; i < vehicle.getPlannedStops().length; i++) {
-                    if (vehicle.getPlannedStops()[i].equals(lastPlace)) {
-                        stopindex = i;
-                        break;
-                    }
-                }
                 StopInSimulation stop = getStopsInSimulations.get(vehicle.getPlannedStops()[stopindex+1].getId());
                  // we update vehicle current place to next stop
                 vehicle.updateCurrentPlace(stop);
@@ -119,8 +112,25 @@ public class Simulator {
                 vehicle.setTimeOfNextStateChange(currentTimeSeconds + waitTimeSeconds);
                 int distanceTraveled = distanceManagers.get(vehicle.getType()).getDistanceMeters(vehicle.getPlannedStops()[stopindex], vehicle.getPlannedStops()[stopindex+1]);
                 vehicle.updateDistanceTraveledMeters(distanceTraveled);
+
+                
+                System.out.println("Time " + currentTimeSeconds + ": Vehicle " + vehicle.getId() + " arrived at " + stop.getName());
+
+
                 break;
             }
+            case VehicleInSimulation.VehicleState.WAITING_FOR_START:
+                if (vehicle.getRoute().getWaitTimesSeconds()[0] > 0) {
+                    vehicle.setState(VehicleInSimulation.VehicleState.WAITING_AT_STOP);
+                    vehicle.setTimeOfNextStateChange(currentTimeSeconds + vehicle.getRoute().getWaitTimesSeconds()[0]);
+                }
+                else {
+                    vehicle.setState(VehicleInSimulation.VehicleState.DRIVING);
+                    if (vehicle.getPlannedStops().length == 1) {throw new java.lang.RuntimeException("Invalid Route of lengh < 2");}
+                    int timeToNextStop = distanceManagers.get(vehicle.getType()).getDistanceSeconds(vehicle.getPlannedStops()[0], vehicle.getPlannedStops()[1]);
+                    vehicle.setTimeOfNextStateChange(timeToNextStop);
+                }
+                break;
             default:
                 throw new IllegalStateException("Unexpected value: " + vehicle.getState());
                 
@@ -170,7 +180,7 @@ public class Simulator {
     private void updateSimulationState(int currentTimeSeconds) {
         addVehiclesToSimulation(currentTimeSeconds);
         for (VehicleInSimulation vehicle : vehiclesCurrentlyInSimulation) {
-            if (vehicle.getTimeOfNextStateChange() == currentTimeSeconds) {
+            if (vehicle.getTimeOfNextStateChange() <= currentTimeSeconds) {
                 updateVehicleState(vehicle, currentTimeSeconds);
                 if (vehicle.getState() == VehicleInSimulation.VehicleState.WAITING_AT_STOP) {
                     Place stop = vehicle.getCurrentPlace();
@@ -196,14 +206,5 @@ public class Simulator {
 
 //in the end remind me to ask how to clear simulation after its done
 //
-    public SimulationStatistics getPassagersStatistics(){
-        int totalPassagersUnboarded = numberOfPassagersLeftBehind; // does not mean they were not transported just that they wanted to ride but had to wait for next stop becouse of capacity reasons
-        int totalPassengersGenerated = numberOfPassengersGenerated;
-        int totalPassengersTransported = numberOfPassengersGenerated;
-        for (StopInSimulation stop : getStopsInSimulations.values()){
-            totalPassengersTransported = totalPassengersTransported - stop.getWaitingPassengers().size();
-        }
-        return new SimulationStatistics(totalPassengersGenerated, totalPassengersTransported, totalPassagersUnboarded); 
     
-    }
 }

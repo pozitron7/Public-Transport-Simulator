@@ -7,7 +7,7 @@ import java.util.HashSet;
 public class RouteManager {
     private List<ScheduledTrip> sortedDailySchedule;
     private int numberOfTrips;
-    private int lastIndex = 0;
+    private int lastIndex = -1; //last started strip, we start with -1 and then increment it
     public RouteManager(List<ScheduledTrip> dailySchedule) {
         this.sortedDailySchedule = new ArrayList<>(dailySchedule);
         this.numberOfTrips = sortedDailySchedule.size();

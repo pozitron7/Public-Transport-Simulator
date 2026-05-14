@@ -243,7 +243,7 @@ public class ImportData {
         vehicles = importVehicleData("data/vehicles.txt");
         places = importPlaceData("data/places.txt");
         distanceManager = new DistanceManager[1];
-        distanceManager[0] = importDistanceData("data/distancesBus.txt");
+        distanceManager[0] = importDistanceData("data/distances/distanceBus.txt");
         routes = importRouteData("data/routes.txt");
         schedule = importScheduleData("data/schedule.txt");
         passagerGeneration = importPassagerGenerationData("data/passengerGeneration.txt");

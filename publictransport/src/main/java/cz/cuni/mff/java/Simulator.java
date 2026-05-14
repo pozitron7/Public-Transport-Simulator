@@ -113,24 +113,18 @@ public class Simulator {
                 int distanceTraveled = distanceManagers.get(vehicle.getType()).getDistanceMeters(vehicle.getPlannedStops()[stopindex], vehicle.getPlannedStops()[stopindex+1]);
                 vehicle.updateDistanceTraveledMeters(distanceTraveled);
 
-                
+
                 System.out.println("Time " + currentTimeSeconds + ": Vehicle " + vehicle.getId() + " arrived at " + stop.getName());
 
 
                 break;
             }
-            case VehicleInSimulation.VehicleState.WAITING_FOR_START:
-                if (vehicle.getRoute().getWaitTimesSeconds()[0] > 0) {
-                    vehicle.setState(VehicleInSimulation.VehicleState.WAITING_AT_STOP);
-                    vehicle.setTimeOfNextStateChange(currentTimeSeconds + vehicle.getRoute().getWaitTimesSeconds()[0]);
-                }
-                else {
-                    vehicle.setState(VehicleInSimulation.VehicleState.DRIVING);
-                    if (vehicle.getPlannedStops().length == 1) {throw new java.lang.RuntimeException("Invalid Route of lengh < 2");}
-                    int timeToNextStop = distanceManagers.get(vehicle.getType()).getDistanceSeconds(vehicle.getPlannedStops()[0], vehicle.getPlannedStops()[1]);
-                    vehicle.setTimeOfNextStateChange(timeToNextStop);
-                }
+            case VehicleInSimulation.VehicleState.WAITING_FOR_START: {
+                vehicle.setState(VehicleInSimulation.VehicleState.WAITING_AT_STOP);
+                int waitTimeSeconds = vehicle.getRoute().getWaitTimesSeconds()[0];
+                vehicle.setTimeOfNextStateChange(currentTimeSeconds + waitTimeSeconds);
                 break;
+            }
             default:
                 throw new IllegalStateException("Unexpected value: " + vehicle.getState());
                 
@@ -179,15 +173,24 @@ public class Simulator {
     }
     private void updateSimulationState(int currentTimeSeconds) {
         addVehiclesToSimulation(currentTimeSeconds);
-        for (VehicleInSimulation vehicle : vehiclesCurrentlyInSimulation) {
-            if (vehicle.getTimeOfNextStateChange() <= currentTimeSeconds) {
+        // we use iterator so we can remove vehicle object without crashing
+        java.util.Iterator<VehicleInSimulation> iterator = vehiclesCurrentlyInSimulation.iterator();
+        while (iterator.hasNext()) {
+            VehicleInSimulation vehicle = iterator.next();
+            while (vehicle.getTimeOfNextStateChange() <= currentTimeSeconds && vehicle.getState() != VehicleInSimulation.VehicleState.FINISHED) {
                 updateVehicleState(vehicle, currentTimeSeconds);
+                
                 if (vehicle.getState() == VehicleInSimulation.VehicleState.WAITING_AT_STOP) {
-                    Place stop = vehicle.getCurrentPlace();
-                    StopInSimulation simStop = (StopInSimulation) stop;
-                    loadAndUnloadPassagersAtStop(vehicle, simStop);
-                    
+                    if (vehicle.getTimeOfNextStateChange() > currentTimeSeconds) {
+                        Place stop = vehicle.getCurrentPlace();
+                        StopInSimulation simStop = (StopInSimulation) stop;
+                        loadAndUnloadPassagersAtStop(vehicle, simStop);
+                    }
                 }
+            }
+            
+            if (vehicle.getState() == VehicleInSimulation.VehicleState.FINISHED) {
+                iterator.remove();
             }
         }
         if (currentTimeSeconds % 60 == 0) { 

@@ -14,6 +14,7 @@ public class Simulator {
     private Map<VehicleTypes, DistanceManager> distanceManagers;
     private Map<Integer, java.util.Set<Place>> validDestinationsForStopId; // is used for passager generation
     int numberOfPassagersLeftBehind = 0; // that is passager that wanted to board but could not becouse vehicle was full
+    int numberOfPassengersGenerated = 0;
     int indexOfVehicleToAddNext = 0;
     public Simulator(RouteManager routeManager, PassagerGeneration passagerGeneration, DistanceManager [] distanceManagers) {
         this.routeManager = routeManager;
@@ -133,6 +134,7 @@ public class Simulator {
             Place [] validDestinations = validDestinationsForStopId.getOrDefault(stop.getId(), new java.util.HashSet<>()).toArray(new Place[0]);
             Place [] passagers = passagerGeneration.generatePassagesWithFinalDestination(stop, validDestinations, numberOfPassagersToGenerate);
             stop.addWaitingPassenger(passagers);
+            numberOfPassengersGenerated += numberOfPassagersToGenerate;
         }
     }
 
@@ -188,9 +190,21 @@ public class Simulator {
             updateSimulationState(currentTime);
         }
     }
-}
+
 // in each iteration we find all vehicles that should start at time and add them to simulation
 // in each iteration we check what vehicles arrived at some station so we need dict of expected arrivals
 // update states of some vehicles
 
 //in the end remind me to ask how to clear simulation after its done
+//
+    public SimulationStatistics getPassagersStatistics(){
+        int totalPassagersUnboarded = numberOfPassagersLeftBehind; // does not mean they were not transported just that they wanted to ride but had to wait for next stop becouse of capacity reasons
+        int totalPassengersGenerated = numberOfPassengersGenerated;
+        int totalPassengersTransported = numberOfPassengersGenerated;
+        for (StopInSimulation stop : getStopsInSimulations.values()){
+            totalPassengersTransported = totalPassengersTransported - stop.getWaitingPassengers().size();
+        }
+        return new SimulationStatistics(totalPassengersGenerated, totalPassengersTransported, totalPassagersUnboarded); 
+    
+    }
+}

@@ -1,5 +1,7 @@
 package cz.cuni.mff.java;
 import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
 
 // Represents a vehicle driving particular route in simulation.
 public class VehicleInSimulation {
@@ -110,17 +112,31 @@ public class VehicleInSimulation {
         }
     }
     public Place[] loadPassagers(Place[] newPassagers) { // try to board as many passagers as possible and return rest of them
-        int boardedCount = 0;
-        for (int i = 0; i < currentPassagers.length && boardedCount < newPassagers.length; i++) {
-            if (currentPassagers[i] == null && newPassagers[i] != null && Arrays.asList(plannedStops).contains(newPassagers[i])) {
-                currentPassagers[i] = newPassagers[boardedCount];
-                boardedCount++; 
+        List<Place> passagersToBoard = new ArrayList<>();
+        for (Place passager : newPassagers) {
+            if (Arrays.asList(plannedStops).contains(passager)) {
+                passagersToBoard.add(passager);
+            } 
+        }
+        // try board passagesr based on bus capacity
+        int indexOfNexgPassagerToBoard = 0;
+        List<Place> passegersBoarded = new ArrayList<>();
+        for (int i = 0; i < currentPassagers.length; i++){
+            if (indexOfNexgPassagerToBoard >= passagersToBoard.size()){ break;}
+            if (currentPassagers[i] == null){
+                Place passager = passagersToBoard.get(indexOfNexgPassagerToBoard);
+                currentPassagers[i] = passager;
+                indexOfNexgPassagerToBoard = indexOfNexgPassagerToBoard + 1;
+                passegersBoarded.add(passager);
+
             }
         }
-        if (boardedCount == newPassagers.length) {
-            return new Place[0];
+        List<Place> unboardedPassagersList = new ArrayList<>(Arrays.asList(newPassagers));
+        for (Place boardedPassager : passegersBoarded) {
+            unboardedPassagersList.remove(boardedPassager);// removes just first occurance
         }
-        return Arrays.copyOfRange(newPassagers, boardedCount, newPassagers.length);
+        
+        return unboardedPassagersList.toArray(new Place[0]);
     }
     public int howManyPassagerWantToRideWithMe(Place [] Passagers){
         int count = 0;

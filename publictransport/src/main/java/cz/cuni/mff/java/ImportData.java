@@ -144,7 +144,7 @@ public class ImportData {
         Place[] places = findPlacesByIds(stopIds);
         
 
-        return new DistanceManager(type, places, distanceMatrixMeters, distanceMatrixSeconds);
+        return new DistanceManager(type, places, distanceMatrixSeconds, distanceMatrixMeters);
     }
     //#id of route ; list of stopsids divided by ; list of waiting time at each stop in seconds divided by;
     public Route [] importRouteData(String filePath) {

@@ -14,6 +14,7 @@ public class Simulator {
     private Map<VehicleTypes, DistanceManager> distanceManagers;
     private Map<Integer, java.util.Set<Place>> validDestinationsForStopId; // is used for passager generation
     int numberOfPassagersLeftBehind = 0; // that is passager that wanted to board but could not becouse vehicle was full
+    int indexOfVehicleToAddNext = 0;
     public Simulator(RouteManager routeManager, PassagerGeneration passagerGeneration, DistanceManager [] distanceManagers) {
         this.routeManager = routeManager;
         this.passagerGeneration = passagerGeneration;
@@ -148,17 +149,24 @@ public class Simulator {
         stop.setWaitingPassengers(remainingPassagers);
 
     }
-    private void initializeSimulation(int simulationStartInSeconds) {
-        vehiclesCurrentlyInSimulation = new ArrayList<>();
-        for (VehicleInSimulation vehicle : sortedVehiclesInSimulation) {
-            if (vehicle.getDepartureTimeSeconds() == simulationStartInSeconds) {
+    private void addVehiclesToSimulation(int simulationStartInSeconds) {
+        for (int i = indexOfVehicleToAddNext; i < routeManager.getSortedDailySchedule().size(); i++) {
+            VehicleInSimulation vehicle = sortedVehiclesInSimulation[i];
+            if (vehicle.getDepartureTimeSeconds() <= simulationStartInSeconds) {
                 vehiclesCurrentlyInSimulation.add(vehicle);
                 StopInSimulation stop = getStopsInSimulations.get(vehicle.getPlannedStops()[0].getId());
                 vehicle.updateCurrentPlace(stop);
+                vehiclesCurrentlyInSimulation.add(vehicle);
+                indexOfVehicleToAddNext++;
             }
+            else {
+                break;
+            }
+            
         }
     }
     private void updateSimulationState(int currentTimeSeconds) {
+        addVehiclesToSimulation(currentTimeSeconds);
         for (VehicleInSimulation vehicle : vehiclesCurrentlyInSimulation) {
             if (vehicle.getTimeOfNextStateChange() == currentTimeSeconds) {
                 updateVehicleState(vehicle, currentTimeSeconds);
@@ -175,7 +183,6 @@ public class Simulator {
         }
     }
     public void runSimulation(int simulationStartInSeconds, int simulationEndInSeconds) {
-        initializeSimulation(simulationStartInSeconds);
         for (int currentTime = simulationStartInSeconds; currentTime <= simulationEndInSeconds; currentTime++) {
             updateSimulationState(currentTime);
         }
@@ -185,4 +192,4 @@ public class Simulator {
 // in each iteration we check what vehicles arrived at some station so we need dict of expected arrivals
 // update states of some vehicles
 
-//small helper functions
+//in the end remind me to ask how to clear simulation after its done

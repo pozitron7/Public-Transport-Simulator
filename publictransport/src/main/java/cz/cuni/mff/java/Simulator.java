@@ -89,8 +89,6 @@ public class Simulator {
                     vehicle.setTimeOfNextStateChange(Integer.MAX_VALUE);
                     vehicle.updateCurrentPlace(vehicle.getPlannedStops()[stopindex]);
                     vehicle.setState(VehicleInSimulation.VehicleState.FINISHED);
-                    // we remove vehicle from simulation
-                    vehiclesCurrentlyInSimulation.remove(vehicle);
                 }
                 // we set vehicle to driving
                 else {

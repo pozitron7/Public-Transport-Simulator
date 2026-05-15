@@ -16,6 +16,7 @@ public class Simulator {
     int numberOfPassagersLeftBehind = 0; // that is passager that wanted to board but could not becouse vehicle was full
     int numberOfPassengersGenerated = 0;
     int indexOfVehicleToAddNext = 0;
+
     public Simulator(RouteManager routeManager, PassagerGeneration passagerGeneration, DistanceManager [] distanceManagers) {
         this.routeManager = routeManager;
         this.passagerGeneration = passagerGeneration;
@@ -208,4 +209,19 @@ public class Simulator {
 //in the end remind me to ask how to clear simulation after its done
 //
     
+
+
+// getters
+public int getNumberOfPassengersGenerated() {
+        return numberOfPassengersGenerated;
+    }
+
+    public int getNumberOfPassagersLeftBehind() {
+        return numberOfPassagersLeftBehind;
+    }
+
+    public VehicleInSimulation[] getSortedVehiclesInSimulation() {
+        return sortedVehiclesInSimulation;
+    }
+
 }

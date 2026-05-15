@@ -22,8 +22,12 @@ public abstract class Place {
     public Coordinates getCoordinates() {
         return coordinates;
     }
-    public boolean equals(Place other) {
-        return this.id == other.id;
+@Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (other == null || getClass() != other.getClass()) return false;
+        Place place = (Place) other;
+        return this.id == place.id;
     }
     public abstract VehicleTypes getType();
 }
